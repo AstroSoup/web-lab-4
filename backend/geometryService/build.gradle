@@ -1,0 +1,50 @@
+plugins {
+    id 'java'
+    id 'war'
+    id('io.ebean') version '14.1.0'
+}
+
+//group 'ru.astrosoup'
+//version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+java {
+    archivesBaseName = 'ROOT'
+}
+
+ext {
+    junitVersion = '5.10.2'
+}
+
+sourceCompatibility = '21'
+targetCompatibility = '21'
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+dependencies {
+    implementation('io.ebean:ebean-postgres:14.1.0')
+    compileOnly('jakarta.platform:jakarta.jakartaee-api:11.0.0')
+    compileOnly("org.projectlombok:lombok:1.18.42")
+
+    annotationProcessor("org.projectlombok:lombok:1.18.42")
+    annotationProcessor('io.ebean:querybean-generator:14.1.0')
+
+    implementation("jakarta.json:jakarta.json-api:2.1.2")
+    implementation("org.postgresql:postgresql:42.7.3")
+    implementation("io.ebean:ebean-ddl-generator:17.1.0")
+
+    testCompileOnly('io.ebean:ebean-test:14.1.0')
+    testCompileOnly("org.projectlombok:lombok:1.18.42")
+    testAnnotationProcessor("org.projectlombok:lombok:1.18.42")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
+}
+
+test {
+    useJUnitPlatform()
+}
