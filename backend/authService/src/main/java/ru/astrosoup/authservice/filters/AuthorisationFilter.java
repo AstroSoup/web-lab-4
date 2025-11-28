@@ -22,7 +22,7 @@ public class AuthorisationFilter implements ContainerRequestFilter {
     private JwtService jwtService;
 
     @Inject
-    JwtDto user;
+    private JwtDto user;
 
     private static final Logger logger = Logger.getLogger(AuthorisationFilter.class.getName());
 
