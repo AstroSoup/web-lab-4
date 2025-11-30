@@ -30,6 +30,7 @@ dependencies {
     implementation('io.ebean:ebean-postgres:14.1.0')
     compileOnly('jakarta.platform:jakarta.jakartaee-api:11.0.0')
     compileOnly("org.projectlombok:lombok:1.18.42")
+    implementation('io.ebean:ebean-migration:14.1.0')
 
     annotationProcessor("org.projectlombok:lombok:1.18.42")
     annotationProcessor('io.ebean:querybean-generator:14.1.0')
@@ -37,6 +38,9 @@ dependencies {
     implementation("jakarta.json:jakarta.json-api:2.1.2")
     implementation("org.postgresql:postgresql:42.7.3")
     implementation("io.ebean:ebean-ddl-generator:17.1.0")
+    runtimeOnly("org.eclipse.parsson:parsson:1.1.5")
+
+
 
     testCompileOnly('io.ebean:ebean-test:14.1.0')
     testCompileOnly("org.projectlombok:lombok:1.18.42")

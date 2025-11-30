@@ -1,10 +1,12 @@
 package ru.astrosoup.geometryservice.controllers;
 
 import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import ru.astrosoup.geometryservice.DTOs.JwtDto;
@@ -26,19 +28,19 @@ public class HitController {
     private static final Logger logger = Logger.getLogger(HitController.class.getName());
 
     @Inject
-    JwtDto user;
-
-    @Inject
     HitService hitService;
+
+    @Context
+    HttpServletRequest request;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getResults() {
         try {
+
+            JwtDto user = (JwtDto) request.getAttribute("user");
             List<AreaHitResponse> hits = hitService.getHits(user);
-            for (AreaHitResponse hit: hits) {
-                logger.info(hit.toString());
-            }
+
             return Response.ok(hits).build();
         } catch (UserDoesNotExistException e) {
             return Response.status(Response.Status.UNAUTHORIZED).build();
@@ -49,7 +51,8 @@ public class HitController {
     @Produces(MediaType.APPLICATION_JSON)
     public Response checkHit(AreaHitRequest areaHitRequest) {
         try {
-             AreaHitResponse hit = hitService.addHit(new AreaHitDto(user, areaHitRequest));
+            JwtDto user = (JwtDto) request.getAttribute("user");
+            AreaHitResponse hit = hitService.addHit(new AreaHitDto(user, areaHitRequest));
             return Response.ok(hit).build();
         } catch (InvalidHitRequestException e) {
             return Response.status(Response.Status.BAD_REQUEST).build();

@@ -6,6 +6,7 @@ import java.time.LocalDate;
 
 @Data
 public class AreaHitResponse {
+    private long id;
     private int r;
     private int x;
     private float y;

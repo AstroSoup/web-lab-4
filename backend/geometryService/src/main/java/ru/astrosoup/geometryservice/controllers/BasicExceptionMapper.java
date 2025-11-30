@@ -24,7 +24,7 @@ public class BasicExceptionMapper implements ExceptionMapper<Exception> {
                     .type("application/json")
                     .build();
         }
-
+        exception.printStackTrace();
         return Response
                 .status(Response.Status.INTERNAL_SERVER_ERROR)
                 .entity("{\"error\": \"Internal server error: " + exception.getClass().getName() + "\"}")

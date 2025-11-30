@@ -4,17 +4,15 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
-import ru.astrosoup.geometryservice.entities.UserEntity;
 
 import java.time.LocalDate;
 import java.util.Objects;
+import java.util.Set;
 
-@Getter
-@Setter
-@ToString
+@Getter @Setter
 @NoArgsConstructor
 @Entity
+@Table(name = "hit_entity")
 public class HitEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,6 +25,8 @@ public class HitEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private UserEntity user;
 
+    @ManyToMany
+    private Set<GroupEntity> groups;
 
     @Override
     public final boolean equals(Object o) {

@@ -21,9 +21,6 @@ public class AuthorisationFilter implements ContainerRequestFilter {
     @Inject
     private JwtService jwtService;
 
-    @Inject
-    private JwtDto user;
-
     private static final Logger logger = Logger.getLogger(AuthorisationFilter.class.getName());
 
     @Override
@@ -38,9 +35,14 @@ public class AuthorisationFilter implements ContainerRequestFilter {
         String token = authHeader.replace("Bearer ", "");
 
         try {
+            JwtDto user = new JwtDto();
             JsonObject claims = jwtService.validateTokenAndGetClaims(token);
             user.setId(claims.getJsonNumber("upn").longValue());
             user.setGroup(claims.getString("group"));
+
+            System.out.println(user.toString());
+
+            requestContext.setProperty("user", user);
         } catch (InvalidJwtException e) {
             requestContext.abortWith(Response
                     .status(Response.Status.UNAUTHORIZED)

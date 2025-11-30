@@ -11,7 +11,6 @@ import java.util.Objects;
 @Entity
 @Getter
 @Setter
-@ToString
 @NoArgsConstructor
 @Table(name = "user_entity")
 public class UserEntity {
