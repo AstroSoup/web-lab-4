@@ -8,15 +8,14 @@ import ru.astrosoup.authservice.DAOs.UserRepository;
 import ru.astrosoup.authservice.DTOs.LoginDto;
 
 import ru.astrosoup.authservice.entities.UserEntity;
-import ru.astrosoup.authservice.exceptions.InvalidJwtException;
-import ru.astrosoup.authservice.exceptions.JwtGenerationException;
-import ru.astrosoup.authservice.exceptions.LoginIsNotValidException;
-import ru.astrosoup.authservice.exceptions.UserAlreadyRegisteredException;
+import ru.astrosoup.authservice.exceptions.*;
 import ru.astrosoup.authservice.security.JwtService;
 import ru.astrosoup.authservice.security.PasswordHashingService;
 
 import java.util.Objects;
 import java.util.Optional;
+
+import static java.util.Objects.isNull;
 
 @ApplicationScoped
 public class AuthorisationService {
@@ -73,7 +72,7 @@ public class AuthorisationService {
         JsonObject claims = jwtService.validateTokenAndGetClaims(refreshToken);
         try {
             Long id = jwtService.getIdFromJti(claims.getString("jti"));
-            if (Objects.isNull(id)) {
+            if (isNull(id)) {
                 throw new JwtGenerationException("Not found");
             }
             jwtService.revokeJti(claims.getString("jti"));
@@ -88,5 +87,31 @@ public class AuthorisationService {
     public void logout(String jwt) throws InvalidJwtException {
         JsonObject claims = jwtService.validateTokenAndGetClaims(jwt);
         jwtService.revokeJti(claims.getString("jti"));
+    }
+
+    public void update(String token, LoginDto user) throws UserAlreadyRegisteredException, UserDoesNotExistException {
+        JsonObject claims = jwtService.validateTokenAndGetClaims(token);
+        Long id = claims.getJsonNumber("upn").longValue();
+
+        Optional<UserEntity> oEntity = userRepository.findById(id);
+        if (oEntity.isEmpty()) {
+            throw new UserDoesNotExistException("User doesn't exist.");
+
+        }
+        UserEntity entity = oEntity.get();
+        if (!isNull(user.getUsername())) {
+            entity.setUsername(user.getUsername());
+        }
+        if (!isNull(user.getPassword())) {
+            entity.setPasswordHash(passwordHashingService.hash(user.getPassword()));
+        }
+        userRepository.update(entity);
+    }
+
+    public void delete(String jwt) {
+        JsonObject claims = jwtService.validateTokenAndGetClaims(jwt);
+        Optional<UserEntity> oEntity = userRepository.findById(claims.getJsonNumber("upn").longValue());
+
+        oEntity.ifPresent(userEntity -> userRepository.delete(userEntity));
     }
 }

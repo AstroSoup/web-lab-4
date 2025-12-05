@@ -19,6 +19,7 @@ public class UserEntity {
     private String username;
     private String passwordHash;
 
+
     @Override
     public final boolean equals(Object o) {
         if (this == o) return true;

@@ -20,7 +20,7 @@ public class BasicExceptionMapper implements ExceptionMapper<Exception> {
             s = s.isEmpty() ? "Request has invalid fields" : s;
             return Response
                     .status(Response.Status.BAD_REQUEST)
-                    .entity("{\"error\": \""+ s +"\"}")
+                    .entity("{\"error\": \""+ ex.getMessage() +"\"}")
                     .type("application/json")
                     .build();
         }

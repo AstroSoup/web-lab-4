@@ -84,6 +84,17 @@ public class AuthorisationController {
         return Response.ok("Logged out successfully").cookie(makeRefreshCookie("", 0)).build();
     }
 
+    @Path("/delete") @DELETE
+    @AuthorisationBlocked
+    public Response delete(@HeaderParam("Authorization") String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return Response.status(Response.Status.UNAUTHORIZED).build();
+        }
+        authHeader = authHeader.replace("Bearer ", "");
+        authorisationService.delete(authHeader);
+        return Response.ok("Deleted successfully").build();
+    }
+
     private NewCookie makeRefreshCookie(String value, int maxAge) {
         return new NewCookie.Builder("refresh-jwt")
                 .httpOnly(true)
@@ -92,6 +103,17 @@ public class AuthorisationController {
                 .sameSite(NewCookie.SameSite.LAX)
                 .value(value)
                 .build();
+    }
+
+    @Path("/update") @PATCH
+    public Response update(@HeaderParam("Authorization") String authHeader, LoginDto loginDto) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return Response.status(Response.Status.UNAUTHORIZED).build();
+        }
+        String token = authHeader.replace("Bearer ", "");
+        authorisationService.update(token, loginDto);
+
+        return  Response.ok("Updated successfully").build();
     }
 
     @Path("/checkauth") @GET

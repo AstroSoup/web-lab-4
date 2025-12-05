@@ -27,6 +27,8 @@ tasks.withType(JavaCompile) {
 }
 
 dependencies {
+    implementation("io.prometheus:prometheus-metrics-exporter-servlet-jakarta:1.4.3")
+
     implementation("com.github.ben-manes.caffeine:caffeine:3.2.3")
 
     implementation('io.ebean:ebean-postgres:14.1.0')
