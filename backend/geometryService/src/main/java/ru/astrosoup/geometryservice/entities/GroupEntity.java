@@ -23,6 +23,8 @@ public class GroupEntity {
     private String description;
     @ManyToMany(mappedBy = "groups")
     private Set<HitEntity> hits = new HashSet<>();
-    @ManyToOne(fetch = FetchType.LAZY)
-    private UserEntity user;
+
+    @Column(nullable = false, name = "user_id")
+    private Long userId;
+
 }

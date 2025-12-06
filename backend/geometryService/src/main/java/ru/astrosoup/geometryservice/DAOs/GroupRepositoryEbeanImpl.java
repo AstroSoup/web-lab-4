@@ -4,7 +4,6 @@ import io.ebean.DB;
 import io.ebean.Database;
 import jakarta.enterprise.context.ApplicationScoped;
 import ru.astrosoup.geometryservice.entities.GroupEntity;
-import ru.astrosoup.geometryservice.entities.UserEntity;
 
 import java.util.List;
 import java.util.Optional;
@@ -41,8 +40,8 @@ public class GroupRepositoryEbeanImpl implements GroupRepository {
     }
 
     @Override
-    public List<GroupEntity> findByUser(UserEntity user) {
-        return db.find(GroupEntity.class).where().eq("user", user).findList();
+    public List<GroupEntity> findByUserId(Long id) {
+        return db.find(GroupEntity.class).where().eq("user_id", id).findList();
     }
 
     @Override

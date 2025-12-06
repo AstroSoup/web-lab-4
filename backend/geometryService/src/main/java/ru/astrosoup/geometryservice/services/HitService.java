@@ -3,20 +3,16 @@ package ru.astrosoup.geometryservice.services;
 import jakarta.ejb.Stateless;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-import ru.astrosoup.geometryservice.DAOs.UserRepository;
 import ru.astrosoup.geometryservice.DAOs.HitRepositoryEbeanImpl;
+import ru.astrosoup.geometryservice.DTOs.AreaHitRequest;
 import ru.astrosoup.geometryservice.DTOs.JwtDto;
 import ru.astrosoup.geometryservice.DTOs.AreaHitDto;
 import ru.astrosoup.geometryservice.DTOs.AreaHitResponse;
-import ru.astrosoup.geometryservice.entities.UserEntity;
 import ru.astrosoup.geometryservice.entities.HitEntity;
 import ru.astrosoup.geometryservice.exceptions.InvalidHitRequestException;
 import ru.astrosoup.geometryservice.exceptions.UserDoesNotExistException;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.logging.Logger;
 
 
@@ -25,18 +21,10 @@ import java.util.logging.Logger;
 public class HitService {
 
     @Inject
-    UserRepository userRepository;
-    @Inject
     HitRepositoryEbeanImpl hitRepository;
 
-    private static final Logger logger = Logger.getLogger(HitService.class.getName());
 
     public AreaHitResponse addHit(AreaHitDto request) throws UserDoesNotExistException, InvalidHitRequestException {
-
-        Optional<UserEntity> optionalUser = userRepository.findById(request.getUser().getId());
-        if (optionalUser.isEmpty()) {
-            throw new UserDoesNotExistException("Hit isn`t registered. User not found.");
-        }
 
         if (!validateRequest(request)) {
             throw new InvalidHitRequestException("Data in hit request isn`t valid.");
@@ -48,9 +36,8 @@ public class HitService {
         hitEntity.setX(request.getX());
         hitEntity.setR(request.getR());
 
-        UserEntity userEntity = optionalUser.get();
 
-        hitEntity.setUser(userEntity);
+        hitEntity.setUserId(request.getUser().getId());
         hitEntity.setHit(isAreaHit(request));
         hitRepository.save(hitEntity);
         AreaHitResponse response = new AreaHitResponse();
@@ -59,16 +46,13 @@ public class HitService {
         response.setY(hitEntity.getY());
         response.setX(hitEntity.getX());
         response.setDate(hitEntity.getDate());
+        response.setId(hitEntity.getId());
         return response;
     }
 
-    public List<AreaHitResponse> getHits(JwtDto jwtDto) throws  UserDoesNotExistException {
-        Optional<UserEntity> optionalUser = userRepository.findById(jwtDto.getId());
-        if (optionalUser.isEmpty()) {
-            throw new UserDoesNotExistException("User not found.");
-        }
-        UserEntity userEntity = optionalUser.get();
-        List<HitEntity> hitEntities = hitRepository.findByUser(userEntity);
+    public List<AreaHitResponse> getHits(JwtDto user) throws  UserDoesNotExistException {
+
+        List<HitEntity> hitEntities = hitRepository.findByUserId(user.getId());
         List<AreaHitResponse> result = new ArrayList<>();
         for (HitEntity hitEntity : hitEntities) {
             AreaHitResponse areaHitResponse = new AreaHitResponse();
@@ -77,6 +61,7 @@ public class HitService {
             areaHitResponse.setR(hitEntity.getR());
             areaHitResponse.setHit(hitEntity.isHit());
             areaHitResponse.setDate(hitEntity.getDate());
+            areaHitResponse.setId(hitEntity.getId());
 
             result.add(areaHitResponse);
         }
@@ -100,5 +85,17 @@ public class HitService {
                 && request.getY() >= -3 && request.getY() <= 5;
     }
 
+    public void delete(AreaHitRequest request) throws InvalidHitRequestException {
+
+        Optional<HitEntity> oEntity = hitRepository.findById(request.getId());
+        if (oEntity.isEmpty()) {
+            throw new InvalidHitRequestException("Entity not found.");
+        }
+        HitEntity entity = oEntity.get();
+        if (!request.getUser().getId().equals(entity.getUserId())) {
+            throw new InvalidHitRequestException("Entity not found.");
+        }
+        hitRepository.delete(entity);
+    }
 
 }

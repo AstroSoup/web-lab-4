@@ -2,10 +2,7 @@ package ru.astrosoup.geometryservice.controllers;
 
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -59,5 +56,19 @@ public class HitController {
         } catch (UserDoesNotExistException e) {
             return Response.status(Response.Status.UNAUTHORIZED).build();
         }
+    }
+
+    @DELETE
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response deleteHit(AreaHitRequest hit) {
+        try {
+            JwtDto user = (JwtDto) request.getAttribute("user");
+            hit.setUser(user);
+            hitService.delete(hit);
+            return Response.ok("Hit is deleted successfully.").build();
+        } catch (InvalidHitRequestException e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
+
     }
 }

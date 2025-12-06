@@ -4,13 +4,11 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import ru.astrosoup.geometryservice.DAOs.GroupRepository;
 import ru.astrosoup.geometryservice.DAOs.HitRepository;
-import ru.astrosoup.geometryservice.DAOs.UserRepository;
 import ru.astrosoup.geometryservice.DTOs.GroupRequest;
 import ru.astrosoup.geometryservice.DTOs.GroupResponse;
 import ru.astrosoup.geometryservice.DTOs.JwtDto;
 import ru.astrosoup.geometryservice.entities.GroupEntity;
 import ru.astrosoup.geometryservice.entities.HitEntity;
-import ru.astrosoup.geometryservice.entities.UserEntity;
 import ru.astrosoup.geometryservice.exceptions.InvalidGroupRequestException;
 import ru.astrosoup.geometryservice.exceptions.UserDoesNotExistException;
 
@@ -33,9 +31,8 @@ public class GroupService {
     @Inject
     private HitRepository hitRepository;
 
-    @Inject
-    private UserRepository userRepository;
 
+    // TODO: IF HIT IS NOT OWNED BY USER THROW AN EXCEPTION
     public GroupResponse createGroup(GroupRequest request) throws InvalidGroupRequestException, UserDoesNotExistException {
 
         GroupEntity entity = new GroupEntity();
@@ -46,19 +43,13 @@ public class GroupService {
         entity.setName(request.getName());
         entity.setDescription(request.getDescription());
 
-        Optional<UserEntity> oUser = userRepository.findById(request.getUser().getId());
 
-        if (oUser.isEmpty()) {
-            throw new UserDoesNotExistException("User not found.");
-        }
-
-        entity.setUser(oUser.get());
-        Long userId = oUser.get().getId();
+        entity.setUserId(request.getUser().getId());
         Set<HitEntity> hits = entity.getHits();
+        Long userId = request.getUser().getId();
         for (Long id : request.getHits()) {
             Optional<HitEntity> oHit = hitRepository.findById(id);
-
-            if (oHit.isPresent() && oHit.get().getUser().getId().equals(userId)) {
+            if (oHit.isPresent() && oHit.get().getUserId().equals(userId)) {
                 hits.add(oHit.get());
             }
         }
@@ -80,14 +71,7 @@ public class GroupService {
 
     public List<GroupResponse> getGroups(JwtDto user) throws UserDoesNotExistException {
 
-        Optional<UserEntity> oUser = userRepository.findById(user.getId());
-
-        if (oUser.isEmpty()) {
-            throw new UserDoesNotExistException("User not found.");
-        }
-
-
-        List<GroupEntity> entities = groupRepository.findByUser(oUser.get());
+        List<GroupEntity> entities = groupRepository.findByUserId(user.getId());
 
         List<GroupResponse> groups = new ArrayList<>();
         for (GroupEntity entity : entities) {
@@ -122,12 +106,12 @@ public class GroupService {
         }
 
         if (!request.getHits().isEmpty()) {
-            Long userId = entity.getUser().getId();
+            Long userId = entity.getUserId();
             Set<HitEntity> hits = entity.getHits();
             for (Long id : request.getHits()) {
                 Optional<HitEntity> oHit = hitRepository.findById(id);
 
-                if (oHit.isPresent() && oHit.get().getUser().getId().equals(userId)) {
+                if (oHit.isPresent() && oHit.get().getUserId().equals(userId)) {
                     hits.add(oHit.get());
                 }
             }
@@ -145,6 +129,9 @@ public class GroupService {
     }
 
     public void deleteGroup(GroupRequest request) throws InvalidGroupRequestException {
+        if (isNull(request.getId())) {
+            throw new InvalidGroupRequestException("Id field is mandatory.");
+        }
         Optional<GroupEntity> oEntity = groupRepository.findById(request.getId());
         if (oEntity.isEmpty()) {
             return;

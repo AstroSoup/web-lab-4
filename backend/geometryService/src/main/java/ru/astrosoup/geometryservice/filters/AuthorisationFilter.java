@@ -10,6 +10,7 @@ import ru.astrosoup.geometryservice.DTOs.JwtDto;
 import ru.astrosoup.geometryservice.annotations.AuthorisationBlocked;
 import ru.astrosoup.geometryservice.exceptions.InvalidJwtException;
 import ru.astrosoup.geometryservice.services.JwtService;
+import ru.astrosoup.geometryservice.services.RevocationService;
 
 import java.io.IOException;
 import java.util.logging.Logger;
@@ -20,6 +21,9 @@ public class AuthorisationFilter implements ContainerRequestFilter {
 
     @Inject
     private JwtService jwtService;
+
+    @Inject
+    private RevocationService revocationService;
 
     private static final Logger logger = Logger.getLogger(AuthorisationFilter.class.getName());
 
@@ -40,7 +44,9 @@ public class AuthorisationFilter implements ContainerRequestFilter {
             user.setId(claims.getJsonNumber("upn").longValue());
             user.setGroup(claims.getString("group"));
 
-            System.out.println(user.toString());
+            if (revocationService.isRevoked(token)) {
+                throw new InvalidJwtException("User`s access has been revoked.");
+            }
 
             requestContext.setProperty("user", user);
         } catch (InvalidJwtException e) {

@@ -27,6 +27,8 @@ tasks.withType(JavaCompile) {
 }
 
 dependencies {
+    implementation("com.github.ben-manes.caffeine:caffeine:3.2.3")
+
     implementation('io.ebean:ebean-postgres:14.1.0')
     compileOnly('jakarta.platform:jakarta.jakartaee-api:11.0.0')
     compileOnly("org.projectlombok:lombok:1.18.42")
@@ -40,7 +42,7 @@ dependencies {
     implementation("io.ebean:ebean-ddl-generator:17.1.0")
     runtimeOnly("org.eclipse.parsson:parsson:1.1.5")
 
-
+    implementation("io.prometheus:prometheus-metrics-exporter-servlet-jakarta:1.4.3")
 
     testCompileOnly('io.ebean:ebean-test:14.1.0')
     testCompileOnly("org.projectlombok:lombok:1.18.42")

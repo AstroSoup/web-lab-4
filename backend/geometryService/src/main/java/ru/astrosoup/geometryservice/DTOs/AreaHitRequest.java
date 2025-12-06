@@ -7,4 +7,6 @@ public class AreaHitRequest {
     private int r;
     private int x;
     private float y;
+    private Long id;
+    private JwtDto user;
 }

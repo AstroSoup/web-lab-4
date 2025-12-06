@@ -22,8 +22,9 @@ public class HitEntity {
     private float y;
     private boolean hit;
     private LocalDate date = LocalDate.now();
-    @ManyToOne(fetch = FetchType.LAZY)
-    private UserEntity user;
+
+    @Column(nullable = false, name = "user_id")
+    private Long userId;
 
     @ManyToMany
     private Set<GroupEntity> groups;

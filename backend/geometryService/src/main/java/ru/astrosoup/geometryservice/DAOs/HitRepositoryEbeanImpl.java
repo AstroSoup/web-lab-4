@@ -3,7 +3,6 @@ package ru.astrosoup.geometryservice.DAOs;
 import io.ebean.DB;
 import io.ebean.Database;
 import jakarta.enterprise.context.ApplicationScoped;
-import ru.astrosoup.geometryservice.entities.UserEntity;
 import ru.astrosoup.geometryservice.entities.HitEntity;
 
 import java.util.List;
@@ -27,11 +26,24 @@ public class HitRepositoryEbeanImpl implements HitRepository {
         return Optional.ofNullable(db.find(HitEntity.class, id));
     }
 
-    public List<HitEntity> findByUser(UserEntity user) {
-        return db.find(HitEntity.class).where().eq("user", user).findList();
+    @Override
+    public List<HitEntity> findByUserId(Long id) {
+        return db.find(HitEntity.class).where().eq("user_id", id).findList();
     }
 
     public List<HitEntity> findAll() {
         return db.find(HitEntity.class).findList();
+    }
+
+    @Override
+    public HitEntity update(HitEntity hit) {
+        db.update(hit);
+        return hit;
+    }
+
+    @Override
+    public HitEntity delete(HitEntity hit) {
+        db.delete(hit);
+        return hit;
     }
 }

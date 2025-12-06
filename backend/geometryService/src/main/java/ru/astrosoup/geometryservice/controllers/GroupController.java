@@ -10,6 +10,7 @@ import ru.astrosoup.geometryservice.DTOs.GroupRequest;
 import ru.astrosoup.geometryservice.DTOs.GroupResponse;
 import ru.astrosoup.geometryservice.DTOs.JwtDto;
 import ru.astrosoup.geometryservice.annotations.AuthorisationBlocked;
+import ru.astrosoup.geometryservice.exceptions.InvalidGroupRequestException;
 import ru.astrosoup.geometryservice.services.GroupService;
 
 import java.util.List;
@@ -51,9 +52,13 @@ public class GroupController {
     @DELETE
     @Produces(MediaType.APPLICATION_JSON)
     public Response deleteGroup(GroupRequest group) {
-        group.setUser(getUserFromJwt());
-        groupService.deleteGroup(group);
-        return Response.ok().build();
+        try{
+            group.setUser(getUserFromJwt());
+            groupService.deleteGroup(group);
+            return Response.ok().build();
+        } catch (InvalidGroupRequestException e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
     }
 
 
