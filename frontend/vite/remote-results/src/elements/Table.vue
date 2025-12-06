@@ -1,38 +1,68 @@
 <script>
 import { useHistoryStore } from 'host/HistoryStore'
-import { mapState, mapActions } from 'pinia'
+import {mapState, mapWritableState} from 'pinia'
 
 export default {
   name: "Table",
   computed: {
-    ...mapState(useHistoryStore, ['history', 'reversedHistory'])
+    ...mapState(useHistoryStore, [
+      'history',
+      'reversedHistory',
+      'isGroupCreating'
+    ]),
+    ...mapWritableState(useHistoryStore, ['chosenHitsIds'])
   },
+
   methods: {
-    ...mapActions(useHistoryStore, ['set_history_from_backend'])
+    set_history_from_backend() {
+      useHistoryStore().set_history_from_backend()
+    },
+
+    toggleRowSelection(hit) {
+      if (!this.isGroupCreating) return;
+
+      const id = hit.id;
+      console.log(this.chosenHitsIds);
+      if (this.chosenHitsIds.includes(id)) {
+        this.chosenHitsIds = this.chosenHitsIds.filter(x => x !== id);
+      } else {
+        this.chosenHitsIds = [...this.chosenHitsIds, id];
+      }
+    },
+
+    isSelected(hit) {
+      return this.chosenHitsIds.includes(hit.id);
+    }
   },
+
   mounted() {
-    this.set_history_from_backend()
+    this.set_history_from_backend();
   }
 }
 </script>
 
 <template>
-  <table>
+  <table :class="{ selectable: isGroupCreating }">
     <thead>
-      <tr>
-        <th>X</th><th>Y</th><th>R</th><th>Попадание</th><th>Дата</th>
-      </tr>
+    <tr>
+      <th>X</th><th>Y</th><th>R</th><th>Попадание</th><th>Дата</th>
+    </tr>
     </thead>
     <tbody>
-      <tr v-for="(row, idx) in reversedHistory" :key="idx">
-        <td>{{ row.x }}</td>
-        <td>{{ row.y }}</td>
-        <td>{{ row.r }}</td>
-        <td :class="{hit:row.hit, miss:!row.hit}">
-          {{ row.hit ? 'Есть пробитие' : 'Броня не пробита' }}
-        </td>
-        <td>{{ row.date }}</td>
-      </tr>
+    <tr
+        v-for="(row, idx) in reversedHistory"
+        :key="idx"
+        :class="{ selected: isSelected(row) }"
+        @click="toggleRowSelection(row)"
+    >
+      <td>{{ row.x }}</td>
+      <td>{{ row.y }}</td>
+      <td>{{ row.r }}</td>
+      <td :class="{ hit: row.hit, miss: !row.hit }">
+        {{ row.hit ? "Есть пробитие" : "Броня не пробита" }}
+      </td>
+      <td>{{ row.date }}</td>
+    </tr>
     </tbody>
   </table>
 </template>
@@ -59,4 +89,12 @@ tr:nth-child(even) {
 }
 .hit { color: green; font-weight: bold; }
 .miss { color: red; font-weight: bold; }
+
+table.selectable tr {
+  cursor: pointer;
+}
+
+.selected {
+  background: rgba(0, 170, 187, 0.25) !important;
+}
 </style>

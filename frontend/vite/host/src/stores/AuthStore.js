@@ -1,5 +1,7 @@
 import { defineStore } from 'pinia'
 
+const APP_DOMAIN = "https://localhost"
+
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     auth_header: ''
@@ -8,7 +10,7 @@ export const useAuthStore = defineStore('auth', {
   actions: {
     async refresh_token() {
       try {
-        const response = await fetch("/auth/refresh")
+        const response = await fetch(APP_DOMAIN + "/auth/refresh")
 
         if (!response.ok) {
           return false
@@ -28,9 +30,10 @@ export const useAuthStore = defineStore('auth', {
 
     async check_auth() {
         try {
-            const response = await fetch("/auth/checkauth", {
+            const response = await fetch(APP_DOMAIN + "/auth/checkauth", {
                 method: 'GET',
-                headers: {
+                    credentials: 'include',
+                    headers: {
                     'Content-Type': 'application/json',
                     'Authorization': this.auth_header
                 }
@@ -48,9 +51,10 @@ export const useAuthStore = defineStore('auth', {
     },
 
     async login(username, password) {
-        const response = await fetch("/auth/login",
+        const response = await fetch(APP_DOMAIN + "/auth/login",
             {
                 method: "POST",
+                credentials: 'include',
                 headers: {
                     'Content-type' : 'application/json'
                 },
@@ -60,13 +64,15 @@ export const useAuthStore = defineStore('auth', {
         if (!response.ok) {
             throw new Error(response.status)
         }
-        this.auth_header = await response.headers.get("Authorization")
+        console.log(response.headers.get("Authorization"))
+        this.auth_header = response.headers.get("Authorization")
     },
 
     async register(username, password) {
-        const response = await fetch("/auth/register",
+        const response = await fetch(APP_DOMAIN + "/auth/register",
             {
                 method: "POST",
+                credentials: 'include',
                 headers: {
                     'Content-type' : 'application/json'
                 },
@@ -81,8 +87,9 @@ export const useAuthStore = defineStore('auth', {
 
     async logout() {
     try {
-        const response = await fetch("/auth/logout", {
+        const response = await fetch(APP_DOMAIN + "/auth/logout", {
                 method: 'GET',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': this.auth_header

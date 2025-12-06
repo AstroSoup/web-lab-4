@@ -1,17 +1,19 @@
 <script>
 
 import Table from './elements/Table.vue'
+import GroupInput from './elements/GroupInput.vue'
 
 export default {
   name: "ResultsContainer",
-  components: { Table }
+  components: { Table, GroupInput }
 }
 </script>
 
 <template>
   <section class="results">
+    <GroupInput />
     <h3>История проверок</h3>
-    <Table v-model="history"/>
+    <Table />
   </section>
 </template>
 
